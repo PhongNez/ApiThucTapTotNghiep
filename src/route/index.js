@@ -1,11 +1,14 @@
 import express from "express";
 import auth from './auth'
+import room from "./room";
+import detailRoom from './detailRoom'
 let router = express.Router();
-import path from 'path'
 
 const initAPIRoute = (app) => {
 
     auth(router)
+    room(router)
+    detailRoom(router)
     return app.use('/api/v1/', router)
 }
 

@@ -1,14 +1,9 @@
-import path from 'path'
 import UserController from '../controllers/UserController'
 
 
 const auth = (router) => {
-    router.get('/test', UserController.login)
-    router.get('/hello', (req, res) => {
-        return res.status(200).json({
-            phong: 'hello'
-        })
-    })
+    router.post('/auth/login', UserController.login)
+    router.post('/auth/signup', UserController.signUp)
 }
 
 export default auth
