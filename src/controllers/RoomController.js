@@ -66,7 +66,8 @@ let updateRoom = async (req, res) => {
 let getRoom = async (req, res) => {
     try {
 
-        let [room] = await pool.execute('select *,a.id as id_phong,a.ten as ten_phong,b.ten as ten_day,c.ten as ten_danh_muc from phong a,day b,danh_muc c where a.id_day =b.id and a.id_danh_muc=c.id')
+        // let [room] = await pool.execute('select *,a.id as id_phong,a.ten as ten_phong,b.ten as ten_day,c.ten as ten_danh_muc from phong a,day b,danh_muc c where a.id_day =b.id and a.id_danh_muc=c.id')
+        let [room] = await pool.execute('Select a.*,b.ten as ten_danh_muc,c.ten as ten_day,d.sl_giuong from(SELECT t1.*,t2.id as id_ctpt,t2.gia,t2.hieu_luc_tu,t2.id_loai_phong,t2.hieu_luc_den FROM phong t1 left JOIN (SELECT c1.* FROM chi_tiet_phong_thue c1 LEFT JOIN chi_tiet_phong_thue c2 ON c1.id_phong = c2.id_phong AND c1.hieu_luc_tu < c2.hieu_luc_tu WHERE c2.id_phong IS NULL ) t2 ON t1.id = t2.id_phong ) a left join danh_muc b on a.id_danh_muc=b.id left join day c on a.id_day=c.id  left join loai_phong d on a.id_loai_phong=d.id  ')
         return res.status(200).json({
             errCode: 0,
             message: 'Chúc mừng đã lấy danh sách phòng thành công ',

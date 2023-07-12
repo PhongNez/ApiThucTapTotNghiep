@@ -26,16 +26,16 @@ let createDetailRoom = async (req, res) => {
 
 let updateDetailRoom = async (req, res) => {
     try {
-        let { gia, id_phong, id_loai_phong, id } = req.body
-        if (!id_phong || !gia || !id_loai_phong) {
+        let { gia, id_loai_phong, id } = req.body
+        if (!gia || !id_loai_phong) {
             return res.status(200).json({
                 errCode: 1,
                 message: 'Vui lòng điền đầy đủ thông tin'
             })
         }
         else {
-            console.log(gia, id_phong, id_loai_phong, id);
-            await pool.execute('UPDATE chi_tiet_phong_thue SET id_phong = ?, gia= ?,  id_loai_phong= ? WHERE id = ?', [id_phong, gia, id_loai_phong, id])
+            console.log(gia, id_loai_phong, id);
+            await pool.execute('UPDATE chi_tiet_phong_thue SET  gia= ?,  id_loai_phong= ? WHERE id = ?', [gia, id_loai_phong, id])
             return res.status(200).json({
                 errCode: 0,
                 message: 'Chúc mừng đã cập nhật thành công '
