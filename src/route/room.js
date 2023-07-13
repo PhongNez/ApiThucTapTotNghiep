@@ -15,6 +15,7 @@ const room = (router) => {
     router.get('/room/get', RoomController.getRoom)
     router.post('/room/create', upload.single('anh'), RoomController.createRoom)
     router.put('/room/update', upload.single('anh'), RoomController.updateRoom)
+    router.delete('/room/delete', RoomController.deleteRoom)
 }
 
 export default room

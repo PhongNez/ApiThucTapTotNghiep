@@ -40,20 +40,37 @@ let updateRoom = async (req, res) => {
         }
         else {
             if (!req.file) {
-                await pool.execute('UPDATE phong SET ten = ?, mo_ta= ?,  id_danh_muc= ?, id_day= ?,trang_thai= ? WHERE id = ?', [ten, mo_ta, id_danh_muc, id_day, trang_thai, id])
-                return res.status(200).json({
-                    errCode: 0,
-                    message: 'Cập nhật phòng thành công'
-                })
-            }
-            else {
-                if (req.file && req.file.filename) {
-                    let anh = req.file.filename
-                    await pool.execute('UPDATE phong SET ten = ?,anh=?, mo_ta= ?,  id_danh_muc= ?, id_day= ?,trang_thai= ? WHERE id = ?', [ten, anh, mo_ta, id_danh_muc, id_day, trang_thai, id])
+                try {
+                    await pool.execute('UPDATE phong SET ten = ?, mo_ta= ?,  id_danh_muc= ?, id_day= ?,trang_thai= ? WHERE id = ?', [ten, mo_ta, id_danh_muc, id_day, trang_thai, id])
                     return res.status(200).json({
                         errCode: 0,
                         message: 'Cập nhật phòng thành công'
                     })
+                } catch (error) {
+                    return res.status(200).json({
+                        errCode: 2,
+                        message: 'Không được trùng tên'
+                    })
+                }
+
+
+            }
+            else {
+                if (req.file && req.file.filename) {
+                    let anh = req.file.filename
+                    try {
+                        await pool.execute('UPDATE phong SET ten = ?,anh=?, mo_ta= ?,  id_danh_muc= ?, id_day= ?,trang_thai= ? WHERE id = ?', [ten, anh, mo_ta, id_danh_muc, id_day, trang_thai, id])
+                        return res.status(200).json({
+                            errCode: 0,
+                            message: 'Cập nhật phòng thành công'
+                        })
+                    } catch (error) {
+                        return res.status(200).json({
+                            errCode: 2,
+                            message: 'Không được trùng tên'
+                        })
+                    }
+
                 }
             }
         }
@@ -80,8 +97,32 @@ let getRoom = async (req, res) => {
     }
 }
 
+let deleteRoom = async (req, res) => {
+    try {
+        let id = req.query.id
+        console.log(id);
+        try {
+            await pool.execute('delete from phong where id=?', [id])
+            return res.status(200).json({
+                errCode: 0,
+                message: 'Chúc mừng đã xóa phòng thành công '
+            })
+        } catch (error) {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Không được xóa vì ảnh hưởng rất nhiều'
+            })
+        }
+
+
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
 module.exports = {
     createRoom,
     updateRoom,
-    getRoom
+    getRoom,
+    deleteRoom
 }
