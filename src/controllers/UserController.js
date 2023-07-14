@@ -13,7 +13,7 @@ let login = async (req, res) => {
         console.log('Check tồn tại: ', isExist);
         //Check email tồn tại
         if (isExist) {
-            const [userDataDb] = await pool.execute('SELECT * FROM tai_khoan where email=?', [data.email])
+            const [userDataDb] = await pool.execute('SELECT a.*,b.id as id_phan_quyen,b.ma_quyen,b.ma_man_hinh FROM tai_khoan a left join phan_quyen b on a.id=b.ma_nhan_vien where email=?', [data.email])
             // const userDataDb = await Model.account.findOne({ where: { email: data.email } })
             //Check password: So sánh password
             let checkPass = bcrypt.compareSync(data.password, userDataDb[0].mat_khau)
