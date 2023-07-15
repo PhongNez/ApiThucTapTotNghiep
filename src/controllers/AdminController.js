@@ -55,31 +55,37 @@ let updateUser = async (req, res) => {
     }
 }
 
-const addRole = (req, res) => {
+const addRole = async (req, res) => {
     try {
         let { themPhong, suaPhong, xoaPhong, ma_nhan_vien, idSuaPhong, idThemPhong, idXoaPhong } = req.body
         console.log(themPhong, suaPhong, xoaPhong, ma_nhan_vien, idSuaPhong, idThemPhong, idXoaPhong);
         if (idSuaPhong && !suaPhong) {
             console.log('delete sua');
+            await pool.execute('delete from phan_quyen where id=?', [idSuaPhong])
         }
         if (idXoaPhong && !xoaPhong) {
             console.log('delete them');
+            await pool.execute('delete from phan_quyen where id=?', [idXoaPhong])
         }
         if (idThemPhong && !themPhong) {
             console.log('delete xoa');
+            await pool.execute('delete from phan_quyen where id=?', [idThemPhong])
         }
-        if (themPhong) {
+        if (!idThemPhong && themPhong) {
             console.log('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [themPhong, ma_nhan_vien]);
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [themPhong, ma_nhan_vien])
         }
-        if (xoaPhong) {
+        if (!idXoaPhong && xoaPhong) {
             console.log('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xoaPhong, ma_nhan_vien]);
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xoaPhong, ma_nhan_vien])
         }
-        if (suaPhong) {
+        if (!idSuaPhong && suaPhong) {
             console.log('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [suaPhong, ma_nhan_vien]);
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [suaPhong, ma_nhan_vien])
         }
         return res.status(200).json({
             errCode: 0,
-            message: 'Chúc mừng đã cập nhật người dùng  thành công'
+            message: 'Chúc mừng đã cập nhật quyền thành công'
         })
     } catch (e) {
         console.log(e);

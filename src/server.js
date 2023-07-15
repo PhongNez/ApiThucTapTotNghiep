@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
     res.send('Hello Phong Cena')
 })
 app.use((req, res) => {
-    res.send('404 NOT FOUND')
+    res.send('404 NOT FOUND À')
 })
 app.listen(port, () => {
     console.log(`Example app listening on port localhost:${port}`)

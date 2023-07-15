@@ -2,7 +2,7 @@ import pool from "../configs/ConnectDB";
 import bcrypt from 'bcryptjs';
 const salt = bcrypt.genSaltSync(10);
 import { createJWT } from '../services/jwtAction'
-
+import auth from '../middleware/auth'
 // đăng nhập
 let login = async (req, res) => {
     try {
@@ -13,7 +13,7 @@ let login = async (req, res) => {
         console.log('Check tồn tại: ', isExist);
         //Check email tồn tại
         if (isExist) {
-            const [userDataDb] = await pool.execute('SELECT a.*,b.id as id_phan_quyen,b.ma_quyen,b.ma_man_hinh FROM tai_khoan a left join phan_quyen b on a.id=b.ma_nhan_vien where email=?', [data.email])
+            const [userDataDb] = await pool.execute('SELECT * FROM tai_khoan where email=?', [data.email])
             // const userDataDb = await Model.account.findOne({ where: { email: data.email } })
             //Check password: So sánh password
             let checkPass = bcrypt.compareSync(data.password, userDataDb[0].mat_khau)
@@ -129,7 +129,37 @@ let hashUserPassword = async (password) => {
         console.log(e);
     }
 }
+
+//LẤy danh sách user 
+let getRoleFromToken = async (req, res) => {
+    try {
+        console.log('Phong hello');
+        let id = auth.tokenData(req).id
+        console.log(id);
+        // if (!id) {
+        let [user] = await pool.execute('select a.id,b.id as id_phan_quyen,b.ma_quyen,b.ma_nhan_vien,b.ma_man_hinh from tai_khoan a join phan_quyen b on a.id=b.ma_nhan_vien where a.id=?', [id])
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã thành công danh sách người dùng ',
+            dataRole: user
+        })
+        // }
+        // else {
+        //     let [user] = await pool.execute('select a.*,b.ten as ten_lop,c.id as id_phan_quyen,c.ma_quyen,c.ma_nhan_vien,c.ma_man_hinh  from tai_khoan a left join lop b on a.id_lop=b.id  left join phan_quyen c on a.id = c.ma_nhan_vien where a.id=?', [id])
+        //     return res.status(200).json({
+        //         errCode: 0,
+        //         message: 'Chúc mừng đã thành công danh sách người dùng ',
+        //         dataUser: user
+        //     })
+        // }
+
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
 module.exports = {
     login,
-    signUp
+    signUp,
+    getRoleFromToken
 }
