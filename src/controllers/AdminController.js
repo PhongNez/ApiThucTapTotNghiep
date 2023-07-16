@@ -6,7 +6,7 @@ let getAllUser = async (req, res) => {
         let id = req.query.id
         console.log(id);
         if (!id) {
-            let [user] = await pool.execute('select a.*,b.ten as ten_lop  from tai_khoan a left join lop b on a.id_lop=b.id ')
+            let [user] = await pool.execute('select a.*,b.ten as ten_lop  from tai_khoan a left join lop b on a.id_lop=b.id where a.id>1')
             return res.status(200).json({
                 errCode: 0,
                 message: 'Chúc mừng đã thành công danh sách người dùng ',

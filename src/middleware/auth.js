@@ -104,7 +104,7 @@ auth.authenUpdateRoom = (req, res, next) => {
             if (quyen && quyen.length > 0) {
                 console.log('Chạy vào if');
                 quyen.map((item, index) => {
-                    if (item.ma_quyen == 3) { check = true }
+                    if (item.ma_quyen == 3 || item.ma_quyen == 1) { check = true }
                 })
                 // return res.status(200).json({ message: 'Chưa được cấp quyền!' })
                 // console.log('Ừ sau next()');
