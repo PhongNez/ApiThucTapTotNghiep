@@ -138,10 +138,12 @@ let getRoleFromToken = async (req, res) => {
         console.log(id);
         // if (!id) {
         let [user] = await pool.execute('select a.id,b.id as id_phan_quyen,b.ma_quyen,b.ma_nhan_vien,b.ma_man_hinh from tai_khoan a join phan_quyen b on a.id=b.ma_nhan_vien where a.id=?', [id])
+        let [dataUser] = await pool.execute('select * from tai_khoan where id=?', [id])
         return res.status(200).json({
             errCode: 0,
             message: 'Chúc mừng đã thành công danh sách người dùng ',
-            dataRole: user
+            dataRole: user,
+            dataUser
         })
         // }
         // else {
