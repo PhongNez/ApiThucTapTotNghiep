@@ -47,7 +47,10 @@ let updateDetailRoom = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
+
+
 module.exports = {
     createDetailRoom,
     updateDetailRoom
+
 }
