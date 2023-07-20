@@ -17,6 +17,12 @@ const room = (router) => {
     router.put('/room/update', upload.single('anh'), auth.authenUpdateRoom, RoomController.updateRoom)
     router.delete('/room/delete', auth.authenDeleteRoom, RoomController.deleteRoom)
 
+    //Danh mục
+    router.get('/room/category/get', RoomController.getCategory)
+    router.post('/room/category/create', RoomController.createCategory)
+    router.put('/room/category/update', RoomController.updateCategory)
+    router.delete('/room/category/delete', RoomController.deleteCategory)
+
     router.get('/order-room/get', RoomController.getOrderRoom)
 }
 

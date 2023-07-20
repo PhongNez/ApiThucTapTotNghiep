@@ -140,10 +140,101 @@ let deleteRoom = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
+
+let getCategory = async (req, res) => {
+    try {
+
+        // let [room] = await pool.execute('select *,a.id as id_phong,a.ten as ten_phong,b.ten as ten_day,c.ten as ten_danh_muc from phong a,day b,danh_muc c where a.id_day =b.id and a.id_danh_muc=c.id')
+        let [category] = await pool.execute('Select * from danh_muc')
+
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã lấy danh sách phòng thành công ',
+            category
+        })
+
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
+
+let createCategory = async (req, res) => {
+    try {
+        let { id, ten } = req.body
+        if (!id || !ten) {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Vui lòng điền đầy đủ thông tin'
+            })
+        }
+        let [category] = await pool.execute('insert into danh_muc(id,ten) values(?,?)', [id, ten])
+
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã danh mục thành công ',
+            category
+        })
+
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
+
+let updateCategory = async (req, res) => {
+    try {
+        let { id, ten } = req.body
+        if (!ten) {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Vui lòng điền đầy đủ thông tin'
+            })
+        }
+        let [category] = await pool.execute('update danh_muc set ten=? where id=?', [ten, id])
+
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã cập nhật danh mục thành công ',
+            category
+        })
+
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
+
+let deleteCategory = async (req, res) => {
+    try {
+        let { id } = req.query
+        try {
+            let [category] = await pool.execute('delete from danh_muc where id=?', [id])
+
+            return res.status(200).json({
+                errCode: 0,
+                message: 'Chúc mừng đã cập nhật danh mục thành công ',
+                category
+            })
+        } catch (error) {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Không được xóa vì ảnh hưởng rất nhiều'
+            })
+        }
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
 module.exports = {
     createRoom,
     updateRoom,
     getRoom,
     deleteRoom,
-    getOrderRoom
+    getOrderRoom,
+    getCategory,
+    createCategory,
+    updateCategory,
+    deleteCategory
 }
