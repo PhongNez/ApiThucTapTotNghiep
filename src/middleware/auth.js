@@ -62,7 +62,7 @@ auth.authenCreateRoom = (req, res, next) => {
 
     const token = authorizationHeader.split(' ')[1];
     if (!token) return res.sendStatus(401);
-
+    let check = false
     jwt.verify(token, process.env.JWT_SECRECT, async (err, data) => {
         if (err) {
             console.log(err);
@@ -72,9 +72,10 @@ auth.authenCreateRoom = (req, res, next) => {
         let [quyen] = await pool.execute('select * from phan_quyen where ma_nhan_vien=?', [data.id])
         if (quyen && quyen.length > 0) {
             quyen.map((item, index) => {
-                if (item.ma_quyen == 2) { next(); }
+                if (item.ma_quyen == 2 || item.ma_quyen == 1) { check = true }
             })
-            return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+            if (check) return next();
+            else return res.status(200).json({ message: 'Chưa được cấp quyền!' })
         }
         else {
             return res.sendStatus(403);

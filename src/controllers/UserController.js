@@ -48,7 +48,7 @@ let login = async (req, res) => {
 //đăng ký
 let signUp = async (req, res) => {
     try {
-        let data = req.body
+        let { data } = req.body
         let userData = await createNewUser(data)
         return res.status(200).json(userData)
     } catch (e) {
@@ -160,8 +160,64 @@ let getRoleFromToken = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
+
+let changePassword = async (req, res) => {
+    try {
+        let id_account = await auth.tokenData(req).id
+        // const userData = await Model.account.findOne({ where: { id: id_account } })
+        let { oldPassword, currentPassword, newPassword } = req.body
+
+        let [user] = await pool.execute('select * from tai_khoan where id=?', [id_account])
+        console.log(oldPassword, currentPassword, newPassword, id_account, user[0].mat_khau);
+        //Check password: So sánh password
+        let checkPass = bcrypt.compareSync(oldPassword, user[0].mat_khau)
+        console.log(checkPass);
+        if (checkPass) {
+            //Nhập 1 password cũ, 1 password mới
+            let hashPasswordFromBcrypt = ''// mã hóa password mới
+
+            console.log(currentPassword, newPassword, id_account);
+
+            if (currentPassword.trim() != newPassword.trim()) {
+                return res.status(200).json({
+                    errCode: 1,
+                    message: 'Mật khẩu không khớp!'
+                })
+            }
+            //if(oldPassword == )
+            else if (currentPassword.trim() != '' && newPassword.trim() != '') {
+                currentPassword = currentPassword.trim()
+                hashPasswordFromBcrypt = await hashUserPassword(currentPassword)
+                currentPassword = hashPasswordFromBcrypt
+
+                await pool.execute('update tai_khoan set mat_khau=? where id=?', [currentPassword, id_account])
+                return res.status(200).json({
+                    errCode: 0,
+                    message: 'Đổi mật khẩu thành công!'
+                })
+            }
+            else {
+                return res.status(200).json({
+                    errCode: 2,
+                    message: 'Vui lòng không được bỏ trống mật khẩu!'
+                })
+            }
+        }
+        else {
+            return res.status(200).json({
+                errCode: 3,
+                message: 'Mật khẩu không hợp lệ. Vui lòng nhập lại!'
+            })
+        }
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 module.exports = {
     login,
     signUp,
-    getRoleFromToken
+    getRoleFromToken,
+    changePassword
 }

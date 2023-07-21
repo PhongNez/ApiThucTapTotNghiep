@@ -148,7 +148,7 @@ const btnXoa = async (req, res) => {
 const getDetailOrderRoom = async (req, res) => {
     try {
         let id = req.query.id
-        let [history] = await pool.execute('SELECt * from lich_su_thue_phong WHERE ID_THUE_PHONG = ?', [id])
+        let [history] = await pool.execute('SELECt * from lich_su_thue_phong WHERE ID_THUE_PHONG = ? order by ngay_thay_doi desc', [id])
 
         return res.status(200).json({
             errCode: 0,
@@ -216,7 +216,21 @@ let btnDaHoanThanh = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
-
+let btnTraPhong = async (req, res) => {
+    try {
+        let id = req.query.id
+        console.log(id);
+        let [data] = await pool.execute('update thue_phong set trang_thai=5 where id=?', [id])
+        let [insert] = await pool.execute('insert into lich_su_thue_phong(id_thue_phong,trang_thai) VALUES(?,?)', [id, 6])
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã lấy đã cập nhật thành công',
+        })
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
 module.exports = {
     createOrderRoom,
     getHistoryOrder,
@@ -226,5 +240,6 @@ module.exports = {
     getDetailOrderRoom,
     changeOrderRoom,
     checkHistoryOrder,
-    btnDaHoanThanh
+    btnDaHoanThanh,
+    btnTraPhong
 }

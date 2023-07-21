@@ -10,6 +10,8 @@ const orderRoom = (router) => {
     router.put('/admin/huy', OrderRoom.btnHuy)
     router.delete('/xoa', OrderRoom.btnXoa)
     router.put('/chuyenphong', OrderRoom.changeOrderRoom)
+    router.put('/traphong', OrderRoom.btnTraPhong)
+
     router.put('/admin/dahoanthanh', OrderRoom.btnDaHoanThanh)
     router.get('/hitory-order-room/detail', OrderRoom.getDetailOrderRoom)
 
