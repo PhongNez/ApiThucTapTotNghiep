@@ -169,9 +169,9 @@ const changeOrderRoom = async (req, res) => {
         let [check] = await pool.execute('SELECT * FROM `thue_phong` WHERE id_tai_khoan=? and trang_thai=2 and id_phong=? group by ngay_dk_thue DESC LIMIT 1', [id_tai_khoan, id_phong])
 
         let [checkId] = await pool.execute('SELECT a.*,b.ten as ten_phong FROM `thue_phong` a,phong b WHERE id_tai_khoan=? and a.trang_thai=2 and a.id_phong=b.id group by ngay_dk_thue DESC LIMIT 1', [id_tai_khoan])
-        // console.log('>>Check phong xua: ', checkId[0].ten_phong, 'Phong moi:', phong_moi);
-        // console.log(check, checkId[0].id);
-        //Kiểm tra phòng đã đủ người
+        console.log('>>Check phong xua: ', checkId[0].ten_phong, 'Phong moi:', phong_moi);
+        console.log(check, checkId[0].id);
+        // Kiểm tra phòng đã đủ người phòng mới
         let [so_luong] = await pool.execute('SELECT count(*) as soluong FROM thue_phong WHERE trang_thai<3 and id_phong=?', [id_phong])
         if (so_luong && so_luong[0].soluong === sl_giuong) {
             return res.status(200).json({
