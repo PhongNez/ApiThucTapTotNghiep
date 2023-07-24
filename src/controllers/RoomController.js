@@ -227,6 +227,9 @@ let deleteCategory = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
+
+
+
 module.exports = {
     createRoom,
     updateRoom,
@@ -236,5 +239,6 @@ module.exports = {
     getCategory,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+
 }

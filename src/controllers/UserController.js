@@ -215,9 +215,35 @@ let changePassword = async (req, res) => {
     }
 }
 
+let updateUser = async (req, res) => {
+    try {
+        let { ten, mssv, sdt, id_lop, dia_chi } = req.body
+        let id = req.query.id
+        console.log(id);
+        console.log(ten, mssv, sdt, id_lop, dia_chi);
+        if (!ten || !mssv || !sdt || !id_lop || !dia_chi) {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Vui lòng điền đầy đủ thông tin'
+            })
+        }
+        else {
+            let [user] = await pool.execute('UPDATE tai_khoan SET ten = ?, mssv = ?,sdt=?,id_lop=?,dia_chi=? WHERE id=?', [ten, mssv, sdt, id_lop, dia_chi, id])
+            return res.status(200).json({
+                errCode: 0,
+                message: 'Chúc mừng đã cập nhật người dùng  thành công'
+            })
+        }
+
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
 module.exports = {
     login,
     signUp,
     getRoleFromToken,
-    changePassword
+    changePassword,
+    updateUser
 }

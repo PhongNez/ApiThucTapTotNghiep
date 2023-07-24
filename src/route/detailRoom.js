@@ -9,6 +9,8 @@ const detailRoom = (router) => {
         DetailRoomController.updateDetailRoom)
 
     router.get('/test', auth.authenUpdateRoom, (req, res) => { return res.send({ test: 'hello' }) })
+    router.get('/history-price', DetailRoomController.getHistoryPriceRoom)
+    router.get('/history-price/detail', DetailRoomController.getDetailHistoryPriceRoom)
 }
 
 export default detailRoom

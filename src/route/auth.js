@@ -6,6 +6,7 @@ const auth = (router) => {
     router.post('/auth/signup', UserController.signUp)
     router.post('/auth/check-role', UserController.getRoleFromToken)
     router.put('/auth/change-password', UserController.changePassword)
+    router.put('/auth/update-user', UserController.updateUser)
 }
 
 export default auth
