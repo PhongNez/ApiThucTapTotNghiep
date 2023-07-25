@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 const salt = bcrypt.genSaltSync(10);
 import { createJWT } from '../services/jwtAction'
 import auth from '../middleware/auth'
+import mail from "../services/mail"
 // đăng nhập
 let login = async (req, res) => {
     try {
@@ -240,10 +241,136 @@ let updateUser = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
+
+//Quên mật khẩu
+let forgotPassword = async (req, res) => {
+    try {
+        let { email } = req.body
+
+        if (!email) {
+            return res.status(200).json({
+                message: 'Vui lòng nhập email!'
+            })
+        }
+
+        let exist = await checkUserEmail(email)
+        console.log('>>>Check exist: ', exist);
+
+        if (exist) {
+            //Tạo 1 mã code gồm 6 số
+            let code = mail.createCode()
+
+            //Lấy id_account của email
+            let id_account = await getIdFromEmail(email)
+            console.log('>>>>Check id_Account: ', id_account);
+            //Gửi mail đi
+            mail.sendVerification(email, code)
+
+            // code = await UserController.hashUserPassword(code)
+            // console.log('>>>>>>>>>>>>>>>Check code :', code);
+
+            // let id_verification = await insertVerification(id_account, code)
+            // console.log(id_verification);
+            let xac_thuc = await pool.execute('insert into xac_thuc(ma_code,id_tai_khoan) values(?,?)', [code, id_account])
+            console.log(xac_thuc);
+
+            //Xóa mã code trong db
+            // autoDeleteCode(id_verification)
+            if (xac_thuc) {
+                // setTimeout(() => autoDeleteCode(id_account), 5000)
+            }
+
+
+            return res.status(200).json({
+                errCode: 0,
+                message: 'Đã gửi mã xác nhận đến email của bạn'
+            })
+        }
+        else {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Tài khoản không tồn tại trong hệ thống'
+            })
+        }
+
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500)
+    }
+}
+
+let autoDeleteCode = async (id_account) => {
+    let deleteCode = await pool.execute('delete from xac_thuc where id_tai_khoan =?', [id_account])
+}
+
+//Lấy id từ email
+let getIdFromEmail = async (email) => {
+    try {
+        // let check = await Model.account.findOne({ where: { email: email } })
+        let [check] = await pool.execute('select * from tai_khoan where email=?', [email])
+        console.log('check: ', check);
+
+        if (check && check[0] && check.length > 0) {
+            console.log('ID ', check[0].id);
+            return check[0].id
+        }
+        // else {
+        //     return false
+        // }
+    }
+    catch (e) {
+        console.log(e);
+    }
+}
+
+let newPasswordForgot = async (req, res) => {
+    try {
+        let { email } = req.body
+
+        if (!email) {
+            return res.status(200).json({
+                message: 'Vui lòng nhập email!'
+            })
+        }
+
+        let exist = await checkUserEmail(email)
+        console.log('>>>Check exist: ', exist);
+
+        if (exist) {
+            //Tạo 1 mã code gồm 6 số
+            let code = mail.createCode()
+
+            //Lấy id_account của email
+            let id_account = await getIdFromEmail(email)
+            console.log('>>>>Check id_Account: ', id_account);
+            let [getCode] = await pool.execute('select * from xac_thuc where id_tai_khoan=? group by ngay desc', [id_account])
+            console.log(getCode[0]);
+
+
+            return res.status(200).json({
+                errCode: 0,
+                message: 'Đã gửi mã xác nhận đến email của bạn'
+            })
+        }
+        else {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Tài khoản không tồn tại trong hệ thống'
+            })
+        }
+
+
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
 module.exports = {
     login,
     signUp,
     getRoleFromToken,
     changePassword,
-    updateUser
+    updateUser,
+    forgotPassword,
+    newPasswordForgot
 }
