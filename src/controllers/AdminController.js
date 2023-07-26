@@ -120,9 +120,67 @@ let getRoleUser = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
+
+let collectMoney = async (req, res) => {
+    try {
+        let id = req.query.id
+        console.log(id);
+        let { tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue, ghi_chu } = req.body
+        console.log(tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue, ghi_chu);
+        tien_phai_dong = Number(tien_phai_dong)
+        tien_da_dong = Number(tien_da_dong)
+        con_no = Number(con_no)
+        da_thu = Number(da_thu)
+        if (da_thu < 1) {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Số tiền thu phải lớn hơn 1',
+            })
+        }
+        let sum = da_thu + tien_da_dong
+        console.log(sum);
+        if (sum > tien_phai_dong) {
+            return res.status(200).json({
+                errCode: 2,
+                message: 'Số tiền đóng đã vượt quá tiền phải đóng',
+            })
+        }
+        con_no = tien_phai_dong - sum
+        // if (!id) {
+        let [user] = await pool.execute('insert into lich_su_thu_tien_phong(tien_phai_dong,tien_da_dong,con_no,da_thu,id_nguoi_thue,ghi_chu) values(?,?,?,?,?,?)', [tien_phai_dong, sum, con_no, da_thu, id_nguoi_thue, ghi_chu])
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã thành công danh sách người dùng ',
+        })
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
+
+let getCollectMoney = async (req, res) => {
+    try {
+        let id = req.query.id
+
+        let [getTienDong] = await pool.execute('select * from lich_su_thu_tien_phong  where id_nguoi_thue=?  group by ngay_thu desc', [id])
+        console.log(getTienDong);
+        // if (!id) {
+        // let [user] = await pool.execute('insert into lich_su_thu_tien_phong(tien_phai_dong,tien_da_dong,con_no,da_thu,id_nguoi_thue) values(?,?,?,?,?)', [tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue])
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã thành công danh sách người dùng ',
+            dataThuTien: getTienDong
+        })
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
 module.exports = {
     getAllUser,
     updateUser,
     addRole,
-    getRoleUser
+    getRoleUser,
+    collectMoney,
+    getCollectMoney
 }

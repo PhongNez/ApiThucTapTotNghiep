@@ -14,7 +14,7 @@ const orderRoom = (router) => {
 
     router.put('/admin/dahoanthanh', OrderRoom.btnDaHoanThanh)
     router.get('/hitory-order-room/detail', OrderRoom.getDetailOrderRoom)
-
+    router.get('/hitory-collect-money/get', OrderRoom.getHistoryCollectMoney)
 }
 
 export default orderRoom

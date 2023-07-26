@@ -257,12 +257,21 @@ let forgotPassword = async (req, res) => {
         console.log('>>>Check exist: ', exist);
 
         if (exist) {
-            //Tạo 1 mã code gồm 6 số
-            let code = mail.createCode()
-
             //Lấy id_account của email
             let id_account = await getIdFromEmail(email)
             console.log('>>>>Check id_Account: ', id_account);
+
+            let [getCode] = await pool.execute('select * from xac_thuc where id_tai_khoan=? group by ngay desc', [id_account])
+            if (getCode && getCode[0]) {
+                return res.status(200).json({
+                    errCode: 2,
+                    message: 'Đã gửi mã xác nhận đến email của bạn'
+                })
+            }
+            //Tạo 1 mã code gồm 6 số
+            let code = mail.createCode()
+
+
             //Gửi mail đi
             mail.sendVerification(email, code)
 
@@ -277,7 +286,7 @@ let forgotPassword = async (req, res) => {
             //Xóa mã code trong db
             // autoDeleteCode(id_verification)
             if (xac_thuc) {
-                // setTimeout(() => autoDeleteCode(id_account), 5000)
+                setTimeout(() => autoDeleteCode(id_account), 30000)
             }
 
 
@@ -325,11 +334,11 @@ let getIdFromEmail = async (email) => {
 
 let newPasswordForgot = async (req, res) => {
     try {
-        let { email } = req.body
+        let { email, code, mat_khau_moi } = req.body
 
-        if (!email) {
+        if (!email || !code || !mat_khau_moi) {
             return res.status(200).json({
-                message: 'Vui lòng nhập email!'
+                message: 'Vui lòng điền đầy đủ thông tin!'
             })
         }
 
@@ -337,20 +346,32 @@ let newPasswordForgot = async (req, res) => {
         console.log('>>>Check exist: ', exist);
 
         if (exist) {
-            //Tạo 1 mã code gồm 6 số
-            let code = mail.createCode()
-
             //Lấy id_account của email
             let id_account = await getIdFromEmail(email)
             console.log('>>>>Check id_Account: ', id_account);
             let [getCode] = await pool.execute('select * from xac_thuc where id_tai_khoan=? group by ngay desc', [id_account])
             console.log(getCode[0]);
+            if (!getCode[0]) {
+                return res.status(200).json({
+                    errCode: 2,
+                    message: 'Mã code không còn hiệu lực'
+                })
+            }
+            if (getCode[0].ma_code == code) {
+                mat_khau_moi = await hashUserPassword(mat_khau_moi)
+                await pool.execute('update tai_khoan set mat_khau=? where id=?', [mat_khau_moi, id_account])
+                return res.status(200).json({
+                    errCode: 0,
+                    message: 'Chúc mừng bạn đã thay đổi mật khẩu thành công'
+                })
+            } else {
+                return res.status(200).json({
+                    errCode: 3,
+                    message: 'Nhập sai mã code'
+                })
+            }
 
 
-            return res.status(200).json({
-                errCode: 0,
-                message: 'Đã gửi mã xác nhận đến email của bạn'
-            })
         }
         else {
             return res.status(200).json({

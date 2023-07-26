@@ -100,8 +100,11 @@ let checkHistoryOrder = async (req, res) => {
 let btnXacNhan = async (req, res) => {
     try {
         let id = req.query.id
+        let { tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue } = req.body
+        console.log(tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue);
         let [data] = await pool.execute('update thue_phong set trang_thai=2 where id=?', [id])
-        let [insert] = await pool.execute('insert into lich_su_thue_phong(id_thue_phong,trang_thai) VALUES(?,?)', [id, 2])
+        let [insert1] = await pool.execute('insert into lich_su_thue_phong(id_thue_phong,trang_thai) VALUES(?,?)', [id, 2])
+        let [insert2] = await pool.execute('insert into lich_su_thu_tien_phong(tien_phai_dong,tien_da_dong,con_no,da_thu,id_nguoi_thue) values(?,?,?,?,?)', [tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue])
         return res.status(200).json({
             errCode: 0,
             message: 'Chúc mừng đã lấy đã cập nhật thành công',
@@ -231,6 +234,35 @@ let btnTraPhong = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
+
+let getHistoryCollectMoney = async (req, res) => {
+    try {
+        let id = req.query.id
+        if (!id) {
+            // let [history] = await pool.execute('select c.*,d.ten as ten_phong from (select a.*,b.id as id_lich_su,b.trang_thai as trang_thai_lich_su,b.ngay_thay_doi from thue_phong a,lich_su_thue_phong b where a.id=b.id_thue_phong ) c left join phong d on c.id_phong=d.id')
+            let [history] = await pool.execute('select a.*,b.gia from(select c.*,d.email,d.ten as ten_tai_khoan from (select a.*,b.ten as ten_phong from thue_phong a left join phong b on a.id_phong=b.id ) c,tai_khoan d where c.id_tai_khoan=d.id) a,(Select a.*,b.ten as ten_danh_muc,c.ten as ten_day,d.sl_giuong from(SELECT t1.*,t2.id as id_ctpt,t2.gia,t2.hieu_luc_tu,t2.id_loai_phong,t2.hieu_luc_den FROM phong t1 left JOIN (SELECT c1.* FROM chi_tiet_phong_thue c1 LEFT JOIN chi_tiet_phong_thue c2 ON c1.id_phong = c2.id_phong AND c1.hieu_luc_tu < c2.hieu_luc_tu WHERE c2.id_phong IS NULL ) t2 ON t1.id = t2.id_phong ) a left join danh_muc b on a.id_danh_muc=b.id left join day c on a.id_day=c.id  left join loai_phong d on a.id_loai_phong=d.id  ) b where a.id_phong=b.id and a.trang_thai=2  order by a.ngay_dk_thue desc')
+            return res.status(200).json({
+                errCode: 0,
+                message: 'Chúc mừng đã lấy danh sách thành công',
+                history
+            })
+        }
+        else {
+            // let [history] = await pool.execute('select c.*,d.ten as ten_phong from (select a.*,b.id as id_lich_su,b.trang_thai as trang_thai_lich_su,b.ngay_thay_doi from thue_phong a,lich_su_thue_phong b where a.id=b.id_thue_phong ) c left join phong d on c.id_phong=d.id where id_tai_khoan=?', [id])
+            let [history] = await pool.execute('select c.*,d.email,d.ten as ten_tai_khoan from (select a.*,b.ten as ten_phong from thue_phong a left join phong b on a.id_phong=b.id where a.id_tai_khoan=?) c,tai_khoan d where c.id_tai_khoan=d.id order by c.ngay_dk_thue desc', [id])
+
+            return res.status(200).json({
+                errCode: 0,
+                message: 'Chúc mừng đã lấy danh sách thành công',
+                history
+            })
+        }
+
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
 module.exports = {
     createOrderRoom,
     getHistoryOrder,
@@ -241,5 +273,6 @@ module.exports = {
     changeOrderRoom,
     checkHistoryOrder,
     btnDaHoanThanh,
-    btnTraPhong
+    btnTraPhong,
+    getHistoryCollectMoney
 }

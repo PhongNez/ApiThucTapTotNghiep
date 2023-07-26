@@ -6,6 +6,8 @@ const admin = (router) => {
     router.put('/admin/update-user', AdminController.updateUser)
     router.post('/admin/add-role', AdminController.addRole)
     router.get('/admin/get-role', AdminController.getRoleUser)
+    router.get('/admin/get-collect-money', AdminController.getCollectMoney)
+    router.post('/admin/collect-money', AdminController.collectMoney)
 }
 
 export default admin
