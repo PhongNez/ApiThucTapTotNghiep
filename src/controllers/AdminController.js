@@ -176,11 +176,49 @@ let getCollectMoney = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
+
+let collectElec = async (req, res) => {
+    try {
+        let { id_phong, so_luong, chi_so_cu, chi_so_moi, don_gia, thang } = req.body
+
+        console.log(id_phong, so_luong, chi_so_cu, chi_so_moi, don_gia, thang);
+        if (!id_phong || !so_luong || !chi_so_cu || !chi_so_moi || !don_gia || !thang) {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Vui lòng nhập đầy đủ thông tin'
+            })
+        }
+
+        so_luong = Number(so_luong)
+        chi_so_cu = Number(chi_so_cu)
+        chi_so_moi = Number(chi_so_moi)
+        don_gia = Number(don_gia)
+        thang = Number(thang)
+        console.log(id_phong, so_luong, chi_so_cu, chi_so_moi, don_gia, thang);
+        let tieu_thu = chi_so_moi - chi_so_cu
+        let so_kw_dm = so_luong * 8
+        let so_kw_vuot_dm = tieu_thu - so_kw_dm
+        let thanh_tien = so_kw_vuot_dm * don_gia
+        let ngay = `2023-${thang}-01`
+        console.log(ngay);
+        let [user] = await pool.execute('insert into lich_su_dien(id_phong,chi_so_cu, chi_so_moi,tieu_thu,so_kw_dinh_muc,so_kw_vuot_dinh_muc,don_gia_1_kw,thanh_tien,ngay, so_luong, trang_thai) values(?,?,?,?,?,?,?,?,?,?,?)',
+            [id_phong, chi_so_cu, chi_so_moi, tieu_thu, so_kw_dm, so_kw_vuot_dm, don_gia, thanh_tien, ngay, so_luong, 1])
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã thành công danh sách người dùng '
+        })
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
+
 module.exports = {
     getAllUser,
     updateUser,
     addRole,
     getRoleUser,
     collectMoney,
-    getCollectMoney
+    getCollectMoney,
+    collectElec
 }
