@@ -58,7 +58,13 @@ let updateUser = async (req, res) => {
 const addRole = async (req, res) => {
     try {
         let { themPhong, suaPhong, xoaPhong, ma_nhan_vien, idSuaPhong, idThemPhong, idXoaPhong } = req.body
+        let { idXemLichSuThuePhong, xemLichSuThuePhong } = req.body
+        let { idXemThuTien, xemThuTien } = req.body
+        let { idXemThuTienDien, xemThuTienDien } = req.body
+        let { idXemDoanhThu, xemDoanhThu } = req.body
+
         console.log(themPhong, suaPhong, xoaPhong, ma_nhan_vien, idSuaPhong, idThemPhong, idXoaPhong);
+        console.log(idXemLichSuThuePhong, xemLichSuThuePhong);
         if (idSuaPhong && !suaPhong) {
             console.log('delete sua');
             await pool.execute('delete from phan_quyen where id=?', [idSuaPhong])
@@ -71,6 +77,7 @@ const addRole = async (req, res) => {
             console.log('delete xoa');
             await pool.execute('delete from phan_quyen where id=?', [idThemPhong])
         }
+
         if (!idThemPhong && themPhong) {
             console.log('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [themPhong, ma_nhan_vien]);
             await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [themPhong, ma_nhan_vien])
@@ -83,9 +90,55 @@ const addRole = async (req, res) => {
             console.log('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [suaPhong, ma_nhan_vien]);
             await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [suaPhong, ma_nhan_vien])
         }
+
+        //6 Xem lịch sử phòng
+        if (idXemLichSuThuePhong && !xemLichSuThuePhong) {
+            console.log('delete xoa');
+            await pool.execute('delete from phan_quyen where id=?', [idXemLichSuThuePhong])
+        }
+        if (!idXemLichSuThuePhong && xemLichSuThuePhong) {
+            console.log('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xemLichSuThuePhong, ma_nhan_vien]);
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xemLichSuThuePhong, ma_nhan_vien])
+        }
+        //6 Xem lịch sử phòng
+
+        //7 Xem thu tiền
+        if (idXemThuTien && !xemThuTien) {
+            console.log('delete xoa');
+            await pool.execute('delete from phan_quyen where id=?', [idXemThuTien])
+        }
+        if (!idXemThuTien && xemThuTien) {
+            console.log('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xemThuTien, ma_nhan_vien]);
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xemThuTien, ma_nhan_vien])
+        }
+        //7 Xem thu tiền
+
+        //8 Xem thu tiền điện
+        if (idXemThuTienDien && !xemThuTienDien) {
+            console.log('delete xoa');
+            await pool.execute('delete from phan_quyen where id=?', [idXemThuTienDien])
+        }
+        if (!idXemThuTienDien && xemThuTienDien) {
+            console.log('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xemThuTienDien, ma_nhan_vien]);
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xemThuTienDien, ma_nhan_vien])
+        }
+        //8 Xem thu tiền điện
+
+        //9 Xem thu tiền điện
+        if (idXemDoanhThu && !xemDoanhThu) {
+            console.log('delete xoa');
+            await pool.execute('delete from phan_quyen where id=?', [idXemDoanhThu])
+        }
+        if (!idXemDoanhThu && xemDoanhThu) {
+            console.log('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xemDoanhThu, ma_nhan_vien]);
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xemDoanhThu, ma_nhan_vien])
+        }
+        //9 Xem thu tiền điện
+
+
         return res.status(200).json({
             errCode: 0,
-            message: 'Chúc mừng đã cập nhật quyền thành công'
+            message: 'Chúc mừng đã cấp quyền thành công'
         })
     } catch (e) {
         console.log(e);
@@ -274,7 +327,7 @@ let getDoanhThu = async (req, res) => {
 let getDoanhThuDien = async (req, res) => {
     try {
         let id = req.query.id
-        let [doanh_thu_dien] = await pool.execute('SELECT YEAR(ngay) AS nam, MONTH(ngay) AS thang, SUM(thanh_tien) AS doanh_thu_thang FROM lich_su_dien GROUP BY YEAR(ngay), MONTH(ngay) ORDER BY YEAR(ngay), MONTH(ngay)')
+        let [doanh_thu_dien] = await pool.execute('SELECT YEAR(ngay) AS nam, MONTH(ngay) AS thang, SUM(thanh_tien) AS doanh_thu_thang FROM lich_su_dien where trang_thai=2  GROUP BY YEAR(ngay), MONTH(ngay)   ORDER BY YEAR(ngay), MONTH(ngay)')
         return res.status(200).json({
             errCode: 0,
             message: 'Chúc mừng đã thành công danh sách người dùng ',
