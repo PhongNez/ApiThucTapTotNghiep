@@ -161,6 +161,40 @@ auth.authenDeleteRoom = (req, res, next) => {
     })
 }
 
+auth.authenCapQuyen = (req, res, next) => {
+    const authorizationHeader = req.headers['authorization'];
+    if (!authorizationHeader) return res.sendStatus(401);
+
+    const token = authorizationHeader.split(' ')[1];
+    if (!token) return res.sendStatus(401);
+
+    let check = false
+    jwt.verify(token, process.env.JWT_SECRECT, async (err, data) => {
+        if (err) {
+            console.log(err);
+            return res.sendStatus(403);
+        }
+        console.log('Phong test:', data.ma_quyen);
+        let [quyen] = await pool.execute('select * from phan_quyen where ma_nhan_vien=?', [data.id])
+        if (quyen && quyen.length > 0) {
+            console.log('Chạy vào if');
+            quyen.map((item, index) => {
+                if (item.ma_quyen == 1) { check = true }
+            })
+            // return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+            // console.log('Ừ sau next()');
+            if (check) return next();
+            else return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+        }
+        else {
+            return res.sendStatus(403);
+        }
+        console.log('Ừ sau next()');
+        console.log('Quyen: ', quyen);
+
+    })
+}
+
 auth.authenUpdatePrice = (req, res, next) => {
     const authorizationHeader = req.headers['authorization'];
     if (!authorizationHeader) return res.sendStatus(401);
@@ -177,5 +211,152 @@ auth.authenUpdatePrice = (req, res, next) => {
         if (data.ma_quyen !== 5) return res.sendStatus(403);
         next();
     })
+}
+
+//Danh mục
+auth.authenCreateCategory = (req, res, next) => {
+    const authorizationHeader = req.headers['authorization'];
+    if (!authorizationHeader) return res.sendStatus(401);
+
+    const token = authorizationHeader.split(' ')[1];
+    if (!token) return res.sendStatus(401);
+    let check = false
+    jwt.verify(token, process.env.JWT_SECRECT, async (err, data) => {
+        if (err) {
+            console.log(err);
+            return res.sendStatus(403);
+        }
+        console.log('Phong test:', data.ma_quyen);
+        let [quyen] = await pool.execute('select * from phan_quyen where ma_nhan_vien=?', [data.id])
+        if (quyen && quyen.length > 0) {
+            quyen.map((item, index) => {
+                if (item.ma_quyen == 10 || item.ma_quyen == 1) { check = true }
+            })
+            if (check) return next();
+            else return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+        }
+        else {
+            return res.sendStatus(403);
+        }
+
+        console.log('Quyen: ', quyen);
+
+    })
+}
+
+auth.authenUpdateCategory = (req, res, next) => {
+    try {
+        const authorizationHeader = req.headers['authorization'];
+        if (!authorizationHeader) return res.sendStatus(401);
+
+        const token = authorizationHeader.split(' ')[1];
+        if (!token) return res.sendStatus(401);
+
+        let check = false
+        jwt.verify(token, process.env.JWT_SECRECT, async (err, data) => {
+            if (err) {
+                console.log(err);
+                return res.sendStatus(403);
+            }
+            console.log('Phong test:', data.ma_quyen);
+            let [quyen] = await pool.execute('select * from phan_quyen where ma_nhan_vien=?', [data.id])
+            if (quyen && quyen.length > 0) {
+                console.log('Chạy vào if');
+                quyen.map((item, index) => {
+                    if (item.ma_quyen == 12 || item.ma_quyen == 1) { check = true }
+                })
+                // return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+                // console.log('Ừ sau next()');
+                if (check) return next();
+                else return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+            }
+            else {
+                return res.sendStatus(403);
+            }
+            console.log('Ừ sau next()');
+            console.log('Quyen: ', quyen);
+
+        })
+    } catch (e) {
+
+        console.log(e);
+        return res.sendStatus(403);
+    }
+
+}
+
+auth.authenDeleteCategory = (req, res, next) => {
+    const authorizationHeader = req.headers['authorization'];
+    if (!authorizationHeader) return res.sendStatus(401);
+
+    const token = authorizationHeader.split(' ')[1];
+    if (!token) return res.sendStatus(401);
+
+    let check = false
+    jwt.verify(token, process.env.JWT_SECRECT, async (err, data) => {
+        if (err) {
+            console.log(err);
+            return res.sendStatus(403);
+        }
+        console.log('Phong test:', data.ma_quyen);
+        let [quyen] = await pool.execute('select * from phan_quyen where ma_nhan_vien=?', [data.id])
+        if (quyen && quyen.length > 0) {
+            console.log('Chạy vào if');
+            quyen.map((item, index) => {
+                if (item.ma_quyen == 11 || item.ma_quyen == 1) { check = true }
+            })
+            // return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+            // console.log('Ừ sau next()');
+            if (check) return next();
+            else return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+        }
+        else {
+            return res.sendStatus(403);
+        }
+        console.log('Ừ sau next()');
+        console.log('Quyen: ', quyen);
+
+    })
+}
+
+auth.authenUpdateUser = (req, res, next) => {
+    try {
+        const authorizationHeader = req.headers['authorization'];
+        if (!authorizationHeader) return res.sendStatus(401);
+
+        const token = authorizationHeader.split(' ')[1];
+        if (!token) return res.sendStatus(401);
+
+        let check = false
+        jwt.verify(token, process.env.JWT_SECRECT, async (err, data) => {
+            if (err) {
+                console.log(err);
+                return res.sendStatus(403);
+            }
+            console.log('Phong test:', data.ma_quyen);
+            let [quyen] = await pool.execute('select * from phan_quyen where ma_nhan_vien=?', [data.id])
+            if (quyen && quyen.length > 0) {
+                console.log('Chạy vào if');
+                quyen.map((item, index) => {
+                    if (item.ma_quyen == 13 || item.ma_quyen == 1) { check = true }
+                })
+                // return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+                // console.log('Ừ sau next()');
+                if (check) return next();
+                else return res.status(200).json({ message: 'Chưa được cấp quyền!' })
+            }
+            else {
+                return res.sendStatus(403);
+            }
+            console.log('Ừ sau next()');
+            console.log('Quyen: ', quyen);
+
+        })
+    } catch (e) {
+
+        console.log(e);
+        return res.sendStatus(403);
+    }
+
 }
 module.exports = auth

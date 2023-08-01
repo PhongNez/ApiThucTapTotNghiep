@@ -161,19 +161,26 @@ let getCategory = async (req, res) => {
 
 let createCategory = async (req, res) => {
     try {
-        let { id, ten } = req.body
-        if (!id || !ten) {
+        let { ten } = req.body
+        if (!ten) {
             return res.status(200).json({
                 errCode: 1,
                 message: 'Vui lòng điền đầy đủ thông tin'
             })
         }
-        let [category] = await pool.execute('insert into danh_muc(id,ten) values(?,?)', [id, ten])
+
+        try {
+            let [category] = await pool.execute('insert into danh_muc(ten) values(?)', [ten])
+        } catch (e) {
+            return res.status(200).json({
+                errCode: 2,
+                message: 'Tên danh mục đã có rồi'
+            })
+        }
 
         return res.status(200).json({
             errCode: 0,
-            message: 'Chúc mừng đã danh mục thành công ',
-            category
+            message: 'Chúc mừng đã thêm  danh mục thành công '
         })
 
     } catch (e) {
@@ -195,7 +202,7 @@ let updateCategory = async (req, res) => {
 
         return res.status(200).json({
             errCode: 0,
-            message: 'Chúc mừng đã cập nhật danh mục thành công ',
+            message: 'Chúc mừng đã xóa danh mục thành công ',
             category
         })
 
@@ -213,7 +220,7 @@ let deleteCategory = async (req, res) => {
 
             return res.status(200).json({
                 errCode: 0,
-                message: 'Chúc mừng đã cập nhật danh mục thành công ',
+                message: 'Chúc mừng đã xóa danh mục thành công ',
                 category
             })
         } catch (error) {

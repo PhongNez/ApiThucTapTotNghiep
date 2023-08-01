@@ -61,6 +61,8 @@ let signUp = async (req, res) => {
 let createNewUser = async (data) => {
     try {
         console.log(data.email, data.password, data.password2);
+        data.password = data.password.trim()
+        data.password2 = data.password2.trim()
         if (!data.email || !data.password || !data.password2) {
             return ({
                 errCode: 2,
@@ -87,8 +89,8 @@ let createNewUser = async (data) => {
                 console.log(hash);
 
                 //INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);
-                await pool.execute('insert into tai_khoan(email,mat_khau) values(?,?)', [data.email, hash])
-
+                await pool.execute('insert into tai_khoan(email,mat_khau,trang_thai) values(?,?,1)', [data.email, hash])
+                mail.sendSignUpSuccess(data.email)
                 return ({
                     errCode: 0,
                     message: 'Đăng ký thành công',
@@ -222,6 +224,24 @@ let updateUser = async (req, res) => {
         let id = req.query.id
         console.log(id);
         console.log(ten, mssv, sdt, id_lop, dia_chi);
+        ten = ten.trim()
+        dia_chi = dia_chi.trim()
+        let checkMSSV = /^[nN]\d{2}[A-Za-z]{4}\d{3}$/.test(mssv)
+        let checkSDT = /^0\d{9}$/.test(sdt)
+        console.log(checkSDT);
+        if (!checkSDT) {
+            return res.status(200).json({
+                errCode: 2,
+                message: 'Số điện thoại chưa đúng định dạng'
+            })
+        }
+        if (!checkMSSV) {
+            return res.status(200).json({
+                errCode: 2,
+                message: 'Mã sinh viên chưa đúng định dạng'
+            })
+        }
+        mssv = mssv.toUpperCase()
         if (!ten || !mssv || !sdt || !id_lop || !dia_chi) {
             return res.status(200).json({
                 errCode: 1,
@@ -229,8 +249,16 @@ let updateUser = async (req, res) => {
             })
         }
         else {
-            let [user] = await pool.execute('UPDATE tai_khoan SET ten = ?, mssv = ?,sdt=?,id_lop=?,dia_chi=? WHERE id=?', [ten, mssv, sdt, id_lop, dia_chi, id])
-            return res.status(200).json({
+            try {
+                let [user] = await pool.execute('UPDATE tai_khoan SET ten = ?, mssv = ?,sdt=?,id_lop=?,dia_chi=? WHERE id=?', [ten, mssv, sdt, id_lop, dia_chi, id])
+
+            } catch (e) {
+                console.log(e);
+                return res.status(200).json({
+                    errCode: 3,
+                    message: 'Mã số sinh viên bị trùng'
+                })
+            } return res.status(200).json({
                 errCode: 0,
                 message: 'Chúc mừng đã cập nhật người dùng  thành công'
             })

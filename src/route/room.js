@@ -19,9 +19,9 @@ const room = (router) => {
 
     //Danh mục
     router.get('/room/category/get', RoomController.getCategory)
-    router.post('/room/category/create', RoomController.createCategory)
-    router.put('/room/category/update', RoomController.updateCategory)
-    router.delete('/room/category/delete', RoomController.deleteCategory)
+    router.post('/room/category/create', auth.authenCreateCategory, RoomController.createCategory)
+    router.put('/room/category/update', auth.authenUpdateCategory, RoomController.updateCategory)
+    router.delete('/room/category/delete', auth.authenDeleteCategory, RoomController.deleteCategory)
 
     router.get('/order-room/get', RoomController.getOrderRoom)
 }

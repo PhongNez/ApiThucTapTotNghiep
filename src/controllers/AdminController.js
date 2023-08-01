@@ -35,6 +35,23 @@ let updateUser = async (req, res) => {
         let id = req.query.id
         console.log(id);
         console.log(ten, mssv, sdt, id_lop, dia_chi);
+
+        let checkMSSV = /^[nN]\d{2}[A-Za-z]{4}\d{3}$/.test(mssv)
+        let checkSDT = /^0\d{9}$/.test(sdt)
+        console.log(checkSDT);
+        if (!checkSDT) {
+            return res.status(200).json({
+                errCode: 2,
+                message: 'Số điện thoại chưa đúng định dạng'
+            })
+        }
+        if (!checkMSSV) {
+            return res.status(200).json({
+                errCode: 2,
+                message: 'Mã sinh viên chưa đúng định dạng'
+            })
+        }
+        mssv = mssv.toUpperCase()
         if (!ten || !mssv || !sdt || !id_lop || !dia_chi) {
             return res.status(200).json({
                 errCode: 1,
@@ -42,8 +59,18 @@ let updateUser = async (req, res) => {
             })
         }
         else {
-            let [user] = await pool.execute('UPDATE tai_khoan SET ten = ?, mssv = ?,sdt=?,id_lop=?,dia_chi=? WHERE id=?', [ten, mssv, sdt, id_lop, dia_chi, id])
-            return res.status(200).json({
+            try {
+                ten = ten.trim()
+                dia_chi = dia_chi.trim()
+                let [user] = await pool.execute('UPDATE tai_khoan SET ten = ?, mssv = ?,sdt=?,id_lop=?,dia_chi=? WHERE id=?', [ten, mssv, sdt, id_lop, dia_chi, id])
+
+            } catch (e) {
+                console.log(e);
+                return res.status(200).json({
+                    errCode: 3,
+                    message: 'Mã số sinh viên bị trùng'
+                })
+            } return res.status(200).json({
                 errCode: 0,
                 message: 'Chúc mừng đã cập nhật người dùng  thành công'
             })
@@ -62,6 +89,9 @@ const addRole = async (req, res) => {
         let { idXemThuTien, xemThuTien } = req.body
         let { idXemThuTienDien, xemThuTienDien } = req.body
         let { idXemDoanhThu, xemDoanhThu } = req.body
+        let { themDanhMuc, suaDanhMuc, xoaDanhMuc, idSuaDanhMuc, idThemDanhMuc, idXoaDanhMuc } = req.body
+        let { xemTaiKhoan, idXemTaiKhoan } = req.body
+        let { suaUser, idSuaUser } = req.body
 
         console.log(themPhong, suaPhong, xoaPhong, ma_nhan_vien, idSuaPhong, idThemPhong, idXoaPhong);
         console.log(idXemLichSuThuePhong, xemLichSuThuePhong);
@@ -135,7 +165,49 @@ const addRole = async (req, res) => {
         }
         //9 Xem thu tiền điện
 
+        //Danh mục 10 11 12
+        if (idSuaDanhMuc && !suaDanhMuc) {
 
+            await pool.execute('delete from phan_quyen where id=?', [idSuaDanhMuc])
+        }
+        if (idXoaDanhMuc && !xoaDanhMuc) {
+            console.log('delete them');
+            await pool.execute('delete from phan_quyen where id=?', [idXoaDanhMuc])
+        }
+        if (idThemDanhMuc && !themDanhMuc) {
+            console.log('delete xoa');
+            await pool.execute('delete from phan_quyen where id=?', [idThemDanhMuc])
+        }
+
+        if (!idThemDanhMuc && themDanhMuc) {
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [themDanhMuc, ma_nhan_vien])
+        }
+        if (!idXoaDanhMuc && xoaDanhMuc) {
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xoaDanhMuc, ma_nhan_vien])
+        }
+        if (!idSuaDanhMuc && suaDanhMuc) {
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [suaDanhMuc, ma_nhan_vien])
+        }
+
+        // 5 Xem tài khoản
+        if (idXemTaiKhoan && !xemTaiKhoan) {
+            console.log('delete xoa');
+            await pool.execute('delete from phan_quyen where id=?', [idXemTaiKhoan])
+        }
+
+        if (!idXemTaiKhoan && xemTaiKhoan) {
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [xemTaiKhoan, ma_nhan_vien])
+        }
+
+        //13 sửa thông tin 
+        if (idSuaUser && !suaUser) {
+            console.log('delete xoa');
+            await pool.execute('delete from phan_quyen where id=?', [idSuaUser])
+        }
+
+        if (!idSuaUser && suaUser) {
+            await pool.execute('insert phan_quyen (ma_quyen,ma_nhan_vien) values(?,?)', [suaUser, ma_nhan_vien])
+        }
         return res.status(200).json({
             errCode: 0,
             message: 'Chúc mừng đã cấp quyền thành công'

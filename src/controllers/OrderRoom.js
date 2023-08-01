@@ -6,6 +6,8 @@ let createOrderRoom = async (req, res) => {
         let { id_tai_khoan, id_phong, so_thang, checkMonthYear, sl_giuong } = req.body
         console.log(id_tai_khoan, id_phong, so_thang, checkMonthYear);
 
+
+
         if (!so_thang || !checkMonthYear) {
             return res.status(200).json({
                 errCode: 1,
@@ -28,10 +30,16 @@ let createOrderRoom = async (req, res) => {
                 console.log(check);
                 return res.status(200).json({
                     errCode: 2,
-                    message: 'Bạn đã thuê hoặc đang thuê phòng nên không thể thuê tiếp!'
+                    message: 'Bạn đã thuê hoặc đang thuê phòng nên không thể thuê tiếp. Vui lòng kiểm tra lịch sử thuê phòng!'
                 })
             }
-            let [data] = await pool.execute('insert into thue_phong(id_tai_khoan,id_phong,so_thang,trang_thai) VALUES(?,?,?,1)', [id_tai_khoan, id_phong, so_thang])
+            // Lấy ngày tháng năm hiện tại
+            const ngay_het_han = new Date();
+
+            // Cộng thêm 2 tháng
+            ngay_het_han.setMonth(ngay_het_han.getMonth() + so_thang);
+            console.log(ngay_het_han);
+            let [data] = await pool.execute('insert into thue_phong(id_tai_khoan,id_phong,so_thang,trang_thai,ngay_het_han) VALUES(?,?,?,1,?)', [id_tai_khoan, id_phong, so_thang, ngay_het_han])
             console.log(data.insertId);
             if (data && data.insertId) {
                 await pool.execute('insert into lich_su_thue_phong(id_thue_phong,trang_thai) values(?,1)', [data.insertId])
@@ -39,11 +47,11 @@ let createOrderRoom = async (req, res) => {
 
             return res.status(200).json({
                 errCode: 0,
-                message: 'Chúc mừng đã thêm thành công '
+                message: 'Chúc mừng đã thuê phòng thành công '
             })
+
+
         }
-
-
     } catch (e) {
         console.log(e);
         return res.send('Lỗi server')
@@ -130,6 +138,21 @@ let btnHuy = async (req, res) => {
     }
 }
 
+let btnHuyTraPhong = async (req, res) => {
+    try {
+        let id = req.query.id
+        let [data] = await pool.execute('update thue_phong set trang_thai=2 where id=?', [id])
+        let [insert] = await pool.execute('insert into lich_su_thue_phong(id_thue_phong,trang_thai) VALUES(?,?)', [id, 2])
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã lấy đã cập nhật thành công',
+        })
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
+
 const btnXoa = async (req, res) => {
     try {
         let id = req.query.id
@@ -167,7 +190,7 @@ const getDetailOrderRoom = async (req, res) => {
 const changeOrderRoom = async (req, res) => {
     try {
         // let id = req.query.id
-        let { id_phong, id_tai_khoan, sl_giuong, phong_moi } = req.body
+        let { id_phong, id_tai_khoan, sl_giuong, phong_moi, tien_phai_dong } = req.body
         console.log(id_phong, id_tai_khoan);
         let [check] = await pool.execute('SELECT * FROM `thue_phong` WHERE id_tai_khoan=? and trang_thai=2 and id_phong=? group by ngay_dk_thue DESC LIMIT 1', [id_tai_khoan, id_phong])
 
@@ -192,6 +215,18 @@ const changeOrderRoom = async (req, res) => {
         if (checkId && checkId[0] && checkId[0].id) {
             let [history] = await pool.execute('update thue_phong set id_phong=? where trang_thai = 2  and id= ?', [id_phong, checkId[0].id])
             let [insert] = await pool.execute('insert into lich_su_thue_phong(id_thue_phong,phong_xua,phong_moi,trang_thai) VALUES(?,?,?,?)', [checkId[0].id, checkId[0].ten_phong, phong_moi, 5])
+            //Thêm vào lịch sử thu tiền
+            let [getTienDong] = await pool.execute('select * from lich_su_thu_tien_phong  where id_nguoi_thue=?  group by ngay_thu desc', [id_tai_khoan])
+            console.log(getTienDong[0]);
+            if (getTienDong && getTienDong[0]) {
+                tien_phai_dong = Number(tien_phai_dong)
+                let con_no = tien_phai_dong - getTienDong[0].tien_da_dong
+                if (getTienDong[0].tien_da_dong >= tien_phai_dong) {
+                    con_no = 0
+                }
+                // let [insert2] = await pool.execute('insert into lich_su_thu_tien_phong(tien_phai_dong,tien_da_dong,con_no,da_thu,id_nguoi_thue) values(?,?,?,?,?)', [tien_phai_dong, getTienDong[0].tien_da_dong, con_no, getTienDong[0].da_thu, id_tai_khoan])
+                let [update] = await pool.execute('update lich_su_thu_tien_phong set tien_phai_dong=?,con_no=? where id=?', [tien_phai_dong, con_no, getTienDong[0].id])
+            }
             return res.status(200).json({
                 errCode: 0,
                 message: 'Chúc mừng đã chuyển phòng thành công',
@@ -277,5 +312,6 @@ module.exports = {
     checkHistoryOrder,
     btnDaHoanThanh,
     btnTraPhong,
+    btnHuyTraPhong,
     getHistoryCollectMoney
 }

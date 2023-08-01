@@ -3,9 +3,9 @@ import DetailRoomController from '../controllers/DetailRoomController'
 import auth from '../middleware/auth'
 
 const detailRoom = (router) => {
-    router.post('/chi-tiet-phong/create', DetailRoomController.createDetailRoom)
+    router.post('/chi-tiet-phong/create', auth.authenCreateRoom, DetailRoomController.createDetailRoom)
     router.put('/chi-tiet-phong/update',
-        //  auth.authenUpdatePrice,
+        auth.authenUpdateRoom,
         DetailRoomController.updateDetailRoom)
 
     router.get('/test', auth.authenUpdateRoom, (req, res) => { return res.send({ test: 'hello' }) })

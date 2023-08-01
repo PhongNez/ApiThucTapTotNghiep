@@ -20,6 +20,16 @@ mail.sendVerification = (userEmail, verification) => {
     transporter.sendMail(mailOptions)
 }
 
+mail.sendSignUpSuccess = (userEmail) => {
+    let mailOptions = {
+        from: 'huynhthanhphong12a1',
+        to: userEmail,
+        subject: 'Chào mừng bạn đến với hệ thống kí túc xá Online',
+        text: 'Chúc mừng bạn đã đăng ký tài khoản thành công',
+    };
+    transporter.sendMail(mailOptions)
+}
+
 mail.createCode = () => {
     let result = '';
     for (let i = 0; i < 6; i++) {

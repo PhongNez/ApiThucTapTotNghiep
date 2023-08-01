@@ -1,9 +1,9 @@
 import AdminController from '../controllers/AdminController'
-
+import auth from '../middleware/auth'
 
 const admin = (router) => {
     router.get('/admin/get-user', AdminController.getAllUser)
-    router.put('/admin/update-user', AdminController.updateUser)
+    router.put('/admin/update-user', auth.authenUpdateUser, AdminController.updateUser)
     router.post('/admin/add-role', AdminController.addRole)
     router.get('/admin/get-role', AdminController.getRoleUser)
     router.get('/admin/get-collect-money', AdminController.getCollectMoney)

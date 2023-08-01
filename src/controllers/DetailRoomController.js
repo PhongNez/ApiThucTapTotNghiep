@@ -11,6 +11,12 @@ let createDetailRoom = async (req, res) => {
             })
         }
         else {
+            let [checkPriceOld] = await pool.execute('select * from  chi_tiet_phong_thue where id_phong=? group by hieu_luc_tu desc', [id_phong])
+            console.log(checkPriceOld[0]);
+            if (checkPriceOld && checkPriceOld[0] && checkPriceOld[0].id) {
+                const currentDate = new Date()
+                await pool.execute('update chi_tiet_phong_thue set hieu_luc_den=? where id=?', [currentDate, checkPriceOld[0].id])
+            }
             await pool.execute('insert into chi_tiet_phong_thue(id_phong, gia, id_loai_phong ) values(?,?,?)', [id_phong, gia, id_loai_phong])
             return res.status(200).json({
                 errCode: 0,
