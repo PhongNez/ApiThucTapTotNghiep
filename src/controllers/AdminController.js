@@ -250,33 +250,39 @@ let collectMoney = async (req, res) => {
     try {
         let id = req.query.id
         console.log(id);
-        let { tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue, ghi_chu } = req.body
-        console.log(tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue, ghi_chu);
+        let { tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue, month, ghi_chu } = req.body
+        // console.log(tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue, month, ghi_chu);
+        console.log('id_nguoi_thue', month);
         tien_phai_dong = Number(tien_phai_dong)
         tien_da_dong = Number(tien_da_dong)
         con_no = Number(con_no)
         da_thu = Number(da_thu)
-        if (da_thu < 1) {
-            return res.status(200).json({
-                errCode: 1,
-                message: 'Số tiền thu phải lớn hơn 1',
-            })
-        }
-        let sum = da_thu + tien_da_dong
-        console.log(sum);
-        if (sum > tien_phai_dong) {
+        if (!month) {
             return res.status(200).json({
                 errCode: 2,
-                message: 'Số tiền đóng đã vượt quá tiền phải đóng',
+                message: 'Bạn chưa chọn tháng để thu tiền',
             })
         }
-        con_no = tien_phai_dong - sum
-        // if (!id) {
-        let [user] = await pool.execute('insert into lich_su_thu_tien_phong(tien_phai_dong,tien_da_dong,con_no,da_thu,id_nguoi_thue,ghi_chu) values(?,?,?,?,?,?)', [tien_phai_dong, sum, con_no, da_thu, id_nguoi_thue, ghi_chu])
-        return res.status(200).json({
-            errCode: 0,
-            message: 'Chúc mừng đã thành công danh sách người dùng ',
-        })
+        let [check] = await pool.execute('select * from lich_su_thu_tien_phong where id=? and trang_thai=2', [month])
+        if (check && check.length > 0) {
+            return res.status(200).json({
+                errCode: 1,
+                message: 'Tháng này khách hàng đã thanh toán rồi',
+            })
+        }
+
+        else {
+            const currentDate = new Date()
+
+            // // if (!id) {
+            let [update] = await pool.execute('update lich_su_thu_tien_phong set con_no=?,da_thu=?,ngay_thu=?,trang_thai=?,ghi_chu=? where id=?', [0, tien_phai_dong, currentDate, 2, ghi_chu, month])
+            // let [user] = await pool.execute('insert into lich_su_thu_tien_phong(tien_phai_dong,tien_da_dong,con_no,da_thu,id_nguoi_thue,ghi_chu) values(?,?,?,?,?,?)', [tien_phai_dong, sum, con_no, da_thu, id_nguoi_thue, ghi_chu])
+            return res.status(200).json({
+                errCode: 0,
+                message: 'Chúc mừng đã thành công danh sách người dùng ',
+            })
+        }
+
     } catch (e) {
         console.log(e);
         return res.send('Lỗi server')
@@ -287,7 +293,26 @@ let getCollectMoney = async (req, res) => {
     try {
         let id = req.query.id
 
-        let [getTienDong] = await pool.execute('select * from lich_su_thu_tien_phong  where id_nguoi_thue=?  group by ngay_thu desc', [id])
+        let [getTienDong] = await pool.execute('select * from lich_su_thu_tien_phong  where id_nguoi_thue=? ', [id])
+        console.log(getTienDong);
+        // if (!id) {
+        // let [user] = await pool.execute('insert into lich_su_thu_tien_phong(tien_phai_dong,tien_da_dong,con_no,da_thu,id_nguoi_thue) values(?,?,?,?,?)', [tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue])
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã thành công danh sách người dùng ',
+            dataThuTien: getTienDong
+        })
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
+
+let getCollectMoneyNew = async (req, res) => {
+    try {
+        let id = req.query.id
+
+        let [getTienDong] = await pool.execute('select * from lich_su_thu_tien_phong  where id_nguoi_thue=? and trang_thai=1 ', [id])
         console.log(getTienDong);
         // if (!id) {
         // let [user] = await pool.execute('insert into lich_su_thu_tien_phong(tien_phai_dong,tien_da_dong,con_no,da_thu,id_nguoi_thue) values(?,?,?,?,?)', [tien_phai_dong, tien_da_dong, con_no, da_thu, id_nguoi_thue])
@@ -307,7 +332,7 @@ let collectElec = async (req, res) => {
         let { id_phong, so_luong, chi_so_cu, chi_so_moi, don_gia, thang } = req.body
 
         console.log(id_phong, so_luong, chi_so_cu, chi_so_moi, don_gia, thang);
-        if (!id_phong || !so_luong || !chi_so_cu || !chi_so_moi || !don_gia || !thang) {
+        if (!id_phong || !chi_so_moi || !don_gia || !thang) {
             return res.status(200).json({
                 errCode: 1,
                 message: 'Vui lòng nhập đầy đủ thông tin'
@@ -381,10 +406,25 @@ let btnCollectElec = async (req, res) => {
     }
 }
 
+let checkCollectElec = async (req, res) => {
+    try {
+        let id = req.query.id
+        let [history] = await pool.execute('select * from lich_su_dien where id_phong=? order by id desc', [id])
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã thành công danh sách người dùng ',
+            history: history[0] ? history[0] : ''
+        })
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
+
 let getDoanhThu = async (req, res) => {
     try {
         let id = req.query.id
-        let [doanh_thu] = await pool.execute('SELECT YEAR(ngay_thu) AS nam, MONTH(ngay_thu) AS thang, SUM(da_thu) AS doanh_thu_thang FROM lich_su_thu_tien_phong GROUP BY YEAR(ngay_thu), MONTH(ngay_thu) ORDER BY YEAR(ngay_thu), MONTH(ngay_thu)')
+        let [doanh_thu] = await pool.execute('SELECT YEAR(thang) AS nam, MONTH(thang) AS thang, SUM(da_thu) AS doanh_thu_thang FROM lich_su_thu_tien_phong where trang_thai=2 GROUP BY YEAR(thang), MONTH(thang) ORDER BY YEAR(thang), MONTH(thang)')
         return res.status(200).json({
             errCode: 0,
             message: 'Chúc mừng đã thành công danh sách người dùng ',
@@ -410,6 +450,21 @@ let getDoanhThuDien = async (req, res) => {
         return res.send('Lỗi server')
     }
 }
+
+let deleteDonChuaDong = async (req, res) => {
+    try {
+        let id = req.query.id
+        let [del] = await pool.execute('DELETE FROM lich_su_thu_tien_phong WHERE trang_thai=1 and id_nguoi_thue=?', [id])
+        return res.status(200).json({
+            errCode: 0,
+            message: 'Chúc mừng đã thành công danh sách người dùng ',
+
+        })
+    } catch (e) {
+        console.log(e);
+        return res.send('Lỗi server')
+    }
+}
 module.exports = {
     getAllUser,
     updateUser,
@@ -421,5 +476,8 @@ module.exports = {
     getCollectElec,
     btnCollectElec,
     getDoanhThu,
-    getDoanhThuDien
+    getDoanhThuDien,
+    deleteDonChuaDong,
+    checkCollectElec,
+    getCollectMoneyNew
 }

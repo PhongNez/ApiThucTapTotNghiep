@@ -20,7 +20,7 @@ let createDetailRoom = async (req, res) => {
             await pool.execute('insert into chi_tiet_phong_thue(id_phong, gia, id_loai_phong ) values(?,?,?)', [id_phong, gia, id_loai_phong])
             return res.status(200).json({
                 errCode: 0,
-                message: 'Chúc mừng đã thêm thành công '
+                message: 'Chúc mừng đã cập nhật giá thành công '
             })
 
         }

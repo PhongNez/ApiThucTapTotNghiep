@@ -145,7 +145,7 @@ auth.authenDeleteRoom = (req, res, next) => {
         if (quyen && quyen.length > 0) {
             console.log('Chạy vào if');
             quyen.map((item, index) => {
-                if (item.ma_quyen == 4) { check = true }
+                if (item.ma_quyen == 4 || item.ma_quyen == 1) { check = true }
             })
             // return res.status(200).json({ message: 'Chưa được cấp quyền!' })
             // console.log('Ừ sau next()');

@@ -9,12 +9,16 @@ const admin = (router) => {
     router.get('/admin/get-collect-money', AdminController.getCollectMoney)
     router.post('/admin/collect-money', AdminController.collectMoney)
     router.get('/history-collect-money', AdminController.getCollectMoney)
+    router.get('/history-collect-money-new', AdminController.getCollectMoneyNew)
     router.post('/admin/collect-elec', AdminController.collectElec)
     router.get('/history-collect-elec', AdminController.getCollectElec)
     router.get('/admin/history-collect-elec', AdminController.getCollectElec)
     router.put('/admin/collect-elec/confirm', AdminController.btnCollectElec)
     router.get('/admin/doanh-thu', AdminController.getDoanhThu)
     router.get('/admin/doanh-thu-dien', AdminController.getDoanhThuDien)
+
+    router.delete('/admin/xoa-don-chua-dong', AdminController.deleteDonChuaDong)
+    router.get('/check-collect-elec', AdminController.checkCollectElec)
 }
 
 export default admin
